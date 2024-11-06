@@ -1,0 +1,6 @@
+#define DOSPARTOFF 446
+#define DOSDISKOFF 444
+
+#define NDOSPART 4
+#define DOSACTIVE 0x80
+#define	DOSMBR_SIGNATURE	0xaa55
