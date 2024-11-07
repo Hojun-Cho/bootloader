@@ -8,6 +8,7 @@
 #define CHAR_R	'R'
 #define CHAR_S	'S'
 #define CHAR_L	'L'
+#define CHAR_B	'B'
 #define DBGMSG(c)	movb	$c, %al;	call	Lchr
 #define puts(s)		movw	$s, %si;	call	Lmessage
 
@@ -19,9 +20,6 @@
 .text
 .code16
 
-.global start
-
-start:
 	// Adjust %cs to be right
 	ljmp	$BOOTSEG, $1f
 1:
@@ -67,7 +65,7 @@ find_active:
 	DBGMSG(CHAR_L)
 	movb	(%si), %al
 	cmpb	$DOSACTIVE, %al
-
+	je	found
 	addw	$PARTSZ, %si
 	loop	find_active
 
@@ -81,6 +79,10 @@ stay_stopped:
 	sti
 	hlt
 	jmp	stay_stopped
+
+found:
+	DBGMSG(CHAR_B)
+	call stay_stopped
 
 Lmessage:
 	pushw	%ax
@@ -116,7 +118,6 @@ endofcode:
 // partion table
 	. = DOSPARTOFF // partion table start address
 pt: .fill 0x40,1,0
-
 	. = 0x1fe
 signature:
 	.short DOSMBR_SIGNATURE
