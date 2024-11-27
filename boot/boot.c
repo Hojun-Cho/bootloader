@@ -60,7 +60,6 @@ wr8(u8 c, u8 fg, u8 bg, int x, int y)
      *where = c | (attrib << 8);
 }
 
-
 void
 boot(dev_t bootdev)
 {
