@@ -1,0 +1,26 @@
+OUTPUT_FORMAT("elf32-i386", "elf32-i386", "elf32-i386")
+OUTPUT_ARCH(i386)
+
+PHDRS
+{
+	text PT_LOAD;
+}
+SECTIONS
+{
+	.text : {
+		KEEP(srt0.o(.text))
+		*(.text)
+	} :text
+	etext = .;
+	.data : { *(.data) } :text
+	edata = .;
+	.bss : { *(.bss) } :text
+	ebss = .;
+    end = .;
+	/DISCARD/ : 
+    {
+        *(.note.gnu.property)
+        *(.comment)
+    }
+}
+ 
