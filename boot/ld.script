@@ -13,6 +13,7 @@ SECTIONS
 	} :text
 	etext = .;
 	.data : { *(.data) } :text
+	.rodata : { *(.rodata) } :text
 	edata = .;
 	.bss : { *(.bss) } :text
 	ebss = .;
