@@ -7,6 +7,7 @@
 	.globl	edata
 	.globl	Gdtr
 	.globl	boot
+	.globl	pmm_init
 
 	.text
 	.code16
@@ -39,9 +40,13 @@ _start:
 	movl	$BOOTSTACK, %esp
 	pushl	%edx
 
-
 	// fill 0 .bss
 	xorl	%eax, %eax
+	movl	$end, %ecx
+	subl	$edata, %ecx
+	movl	$edata, %edi
+	cld
+	rep;	stosb
 
-	call	boot;
-
+	call	pmm_init
+	call	boot
