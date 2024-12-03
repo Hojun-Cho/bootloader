@@ -79,14 +79,16 @@ load_boot:
 	call	read_cluster
 
 	read_fat:
+		pushw	%bx
 		pushw	%ax
 		shift_magic = .+1
 		movb	$0x90, %cl
-		shrw	%cl, %ax
-		addw	%ds:0x0e, %ax
+		shrw	%cl, %ax	// get sector
+		addw	%ds:0x0e, %ax	// add reserved sector
 		movw	$FATSEG, %bx
 		call	read_sector
 		popw	%cx
+		popw	%bx
 		and_magic = .+2
 		andw	$0x9090, %cx
 		movw	%es:(,%ecx, 2), %ax
