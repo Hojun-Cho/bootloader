@@ -1,6 +1,6 @@
 .file "mbr.S"
 
-#include "def.h"
+#include "btld_conf.h"
 
 #define CHAR_LBA_READ '.'
 #define CHAR_R	'R'
@@ -8,7 +8,6 @@
 #define CHAR_L	'L'
 #define CHAR_B	'B'
 #define CHAR_G	'G'
-#define DBGMSG(c)	movb	$c, %al;	call	Lchr
 #define puts(s)		movw	$s, %si;	call	Lmessage
 
 // 0x07C00 - 0x07DFF	BIOS load us here
@@ -32,7 +31,6 @@ start:
 
 	// set up data segment
 	movw	%ax, %ds
-	DBGMSG(CHAR_S)
 
 	// relocate for PBR
 	// copy to 0x07a0
@@ -48,13 +46,12 @@ start:
 	ljmp	$BOOTRELOCSEG, $reloc
 
 reloc:
-	DBGMSG(CHAR_R)
 
 	pushw	%ds
 	popw	%es
 	pushw	%cs
 	popw	%ds
-	testb	$DOSACTIVE, %dl
+	testb	$0x80, %dl
 	jnz	drive_ok
 	puts(efdmbr)
 	jmp	stay_stopped
@@ -64,11 +61,10 @@ drive_ok:
 	movw	$NDOSPART, %cx
 
 find_active:
-	DBGMSG(CHAR_L)
 	movb	(%si), %al
-	cmpb	$DOSACTIVE, %al
+	cmpb	$0x80, %al
 	je	found
-	addw	$PARTSZ, %si
+	addw	$16, %si	//add partion size
 	loop	find_active
 
 no_part:
@@ -83,7 +79,6 @@ stay_stopped:
 	jmp	stay_stopped
 
 found:
-	DBGMSG(CHAR_B)
 	movb	%dl, %al
 	andb	$0x0f, %al
 	addb	$'0', %al
@@ -178,16 +173,15 @@ eread:	.asciz	"\r\nRead error\r\n"
 enoos:	.asciz	"No O/S\r\n"
 enoboot: .ascii	"No active partion"
 crlf: .asciz "\r\n"
-
 endofcode:
 	nop
 
-// partion table
 	. = DOSPARTOFF // partion table start address
-pt: .fill 0x40,1,0
+pt:
+	.fill 0x40,1,0
 
 	. = 0x1fe
 signature:
-	.short DOSMBR_SIGNATURE
+	.short 0xaa55 
 	. = 0x200
 

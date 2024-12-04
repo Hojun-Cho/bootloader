@@ -1,12 +1,18 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/ioctl.h>
 #include <sys/mount.h>
-#include <sys/sysmacros.h>
+#include <fcntl.h>
 #include <sys/wait.h>
 #include <errno.h>
 #include <assert.h>
-#include "dat.h"
+#include <u.h>
+#include "btld_conf.h"
+#include "btld_disk.h"
 #include "elf32.h"
 
 static char *devpath;
@@ -39,21 +45,21 @@ static struct{
 	{"and_magic", 2},
 };
 
-void
+static void
 usage(void)
 {
 	fprintf(stderr, "usgae: ./installboot device [bin]\n");
 	exit(1);
 }
 
-int
+static int
 streq(char *a, char *b)
 {
 	int la = strlen(a);
 	return la==strlen(b) && memcmp(a, b, la)==0;
 }
 
-void
+static void
 loadelf(char *fname)
 {
 	int fd;
@@ -96,7 +102,7 @@ found:
 	close(fd);
 }
 
-void
+static void
 symset(char *name, u32 val)
 {
 	for(int i = 0; i < elem(syms); ++i){
@@ -108,7 +114,7 @@ symset(char *name, u32 val)
 	assert(0 && "symbol not exist");
 }
 
-uint
+static uint
 tou32(u8 *str, int i)
 {
 	uint x = 0;
@@ -120,7 +126,7 @@ tou32(u8 *str, int i)
 	return x;
 }
 
-u16
+static u16
 exponent(u16 x)
 {
 	switch(x){
@@ -138,7 +144,7 @@ exponent(u16 x)
 	}
 }
 
-void
+static void
 emit(u64 off)
 {
 	for(int i = 0; i < elem(syms); ++i){
@@ -161,7 +167,7 @@ emit(u64 off)
 			sizeof(btcode)-0x3c);
 }
 
-void
+static void
 setbootparam(int ino, int off, int sec)
 {
 	u8 buf[512];
@@ -189,18 +195,7 @@ setbootparam(int ino, int off, int sec)
 	symset("and_magic", bps-1);
 }
 
-void
-catpath(char *dst, char *s1, char *s2)
-{
-	while(*s1)
-		*dst++ = *s1++;
-	*dst++ = '/';
-	while(*s2)
-		*dst++ = *s2++;
-	*dst = '\0';
-}
-
-void
+static void
 install(void)
 {
 	char *args[] = {shpath, devpath, NULL};

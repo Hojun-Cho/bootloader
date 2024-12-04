@@ -1,15 +1,17 @@
-PROG=installboot
-SRCS=$(wildcard *.c)
-OBJS=$(SRCS:.c=.o)
+SDIR ?= ../
+BDIR ?= ./
+
+PROG = installboot
+SRCS = installboot.c
+OBJS = installboot.o
 
 CFLAGS = -g -Wall -Werror
-CPPFLAGS = -I $(IDIR)
+CPPFLAGS = -I $(SDIR)
 
 ${PROG}: $(OBJS)
-	$(CC) $(CFLAGS) -o $(BDIR)/$(PROG) $^
-	cp filecopy.sh $(BDIR)
+	$(CC) $(CFLAGS) -o $(BDIR)/$(PROG) $(OBJS)
 
-$(OBJS): ../dat.h
+$(OBJS): $(SDIR)/u.h $(SDIR)/btld_conf.h $(SDIR)/btld_disk.h elf32.h
 
 clean:
-	rm -rf $(PROG) *.o
+	rm -rf $(PROG) $(OBJS)

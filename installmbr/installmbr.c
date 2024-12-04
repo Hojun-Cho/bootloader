@@ -1,17 +1,24 @@
+#include <stdint.h>
+#include <string.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <linux/fs.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
 #include <stdio.h>
 #include <limits.h>
 #include <endian.h>
 #include <stdlib.h>
-#include "dat.h"
+#include <assert.h>
+#include <u.h>
+#include "btld_conf.h"
+#include "btld_disk.h"
 
 static char *binpath = "build/mbr";
 static char bootcode[DOSPARTOFF];
 static Disk dsk;
 
-void
+static void
 usage(void)
 {
 	fprintf(stderr, "usage: ./mkmbr device\n");
@@ -34,7 +41,7 @@ secwrite(void *buf, u64 sec, u32 cnt, Disk *dsk)
 	return wc;
 }
 
-char*
+static char*
 secread(u64 sec, u32 cnt, Disk *dsk)
 {
 	char *buf;
@@ -53,7 +60,7 @@ secread(u64 sec, u32 cnt, Disk *dsk)
 	return buf;
 }
 
-int
+static int
 diskwrite(void *buf, u64 sec, u64 sz, Disk *dsk)
 {
 	char *secbuf;
@@ -68,7 +75,7 @@ diskwrite(void *buf, u64 sec, u64 sz, Disk *dsk)
 	return wc;
 }
 
-Part
+static Part
 dospt2pt(DOSpart dpt, u64 self, u64 ext)
 {
 	Part pt={0,};
@@ -90,7 +97,7 @@ dospt2pt(DOSpart dpt, u64 self, u64 ext)
 // H = (LBA / SPT) % HPC
 // S = (LBA / SPT) + 1
 
-CHS
+static CHS
 lba2chs(u64 lba, u64 spt, u64 hpc)
 {
 	CHS c = {0,};
@@ -101,7 +108,7 @@ lba2chs(u64 lba, u64 spt, u64 hpc)
 	return c;
 }
 
-CHS
+static CHS
 lba2chsbeg(Part pt)
 {
 	if(pt.ns == 0 || pt.id == DOSPTYP_UNUSED)
@@ -109,7 +116,7 @@ lba2chsbeg(Part pt)
 	return lba2chs(pt.bs, dsk.spt, dsk.hpc);
 }
 
-CHS
+static CHS
 lba2chsend(Part pt)
 {
 	if(pt.ns == 0 || pt.id == DOSPTYP_UNUSED)
@@ -117,7 +124,7 @@ lba2chsend(Part pt)
 	return lba2chs(pt.bs+pt.ns-1, dsk.spt, dsk.hpc);
 }
 
-CHS
+static CHS
 chsnorm(u8 id, CHS c)
 {
 	if(c.head > 254 || c.sec > 63 || c.cyl > 1023){
@@ -131,7 +138,7 @@ chsnorm(u8 id, CHS c)
 	return c;
 }
 
-DOSpart
+static DOSpart
 pt2dospt(Part pt, u64 self, u64 ext)
 {
 	DOSpart d={0,};
@@ -158,7 +165,7 @@ pt2dospt(Part pt, u64 self, u64 ext)
 	return d;
 }
 
-DOSmbr
+static DOSmbr
 mbr2dosmbr(MBR m)
 {
 	DOSmbr d={0,};
@@ -174,7 +181,7 @@ mbr2dosmbr(MBR m)
 	return d;
 }
 
-MBR
+static MBR
 mbrinit(void)
 {
 	MBR m = {0,};
@@ -198,7 +205,7 @@ mbrinit(void)
 	return m;
 }
 
-int
+static int
 mbrwrite(MBR m)
 {
 	DOSmbr d;
@@ -209,7 +216,7 @@ mbrwrite(MBR m)
 	return wc; 
 }
 
-void
+static void
 read512(char *path)
 {
 	int fd;

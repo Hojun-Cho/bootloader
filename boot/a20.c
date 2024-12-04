@@ -1,18 +1,7 @@
-#define elem(x) (sizeof(x)/sizeof((x)[0]))
+#include <u.h>
+#include "fn.h"
 
-// IO Port	Access Type	Purpose
-// 0x60	Read/Write	Data Port
-// 0x64	Read	Status Register
-// 0x64	Write	Command Register
-
-typedef struct{
-	char *name;
-	void (**probes)(void);
-	int cnt;
-}BootProbe;
-
-// for high memory
-static void
+void
 a20up(void)
 {
 	struct{
@@ -43,25 +32,4 @@ a20up(void)
 		;
 	while(inb(i8042.sport) & i8042.dib)	
 		inb(i8042.dport);
-}
-
-static void (*probe1[])(void) = {
-	a20up,
-};
-static void (*probe2[])(void) = {
-};
-
-static BootProbe probes[] = {
-	{"probing", probe1, elem(probe1) },
-	{"disk", probe2, elem(probe2) },
-};
-
-static void
-machdep(void)
-{
-	for(int i = 0; i < elem(probes); ++i){
-		BootProbe bp = probes[i];
-		for(int j = 0; j < bp.cnt; ++j)
-			bp.probes[j]();
-	}	
 }

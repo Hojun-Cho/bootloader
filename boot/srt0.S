@@ -1,13 +1,12 @@
 .file "srt0.S"
 
-#define BOOTSTACK 0xfffc
-#define	CR0_PE	0x00000001	/* Protected mode Enable */
+#include "def.h"
 
 	.globl	end
 	.globl	edata
 	.globl	Gdtr
 	.globl	boot
-	.globl	pmm_init
+	.globl	pmode_init
 
 	.text
 	.code16
@@ -20,14 +19,16 @@ _start:
 
 1:
 	popl	%edx
+// load GDT
 	cli
 	pushl	%cs
 	popl	%ds
 	addr32	data32 lgdt	(Gdtr - LINKADDR)
 	movl	%cr0, %eax
+// enable protected mode
 	orl	$CR0_PE, %eax
 	data32	movl %eax, %cr0
-	data32	ljmp $8, $1f
+	data32	ljmp $S32TEXT, $1f
 
 1:
 	.code32
@@ -37,7 +38,7 @@ _start:
 	mov	%ax, %es
 	mov	%ax, %fs
 	mov	%ax, %gs
-	movl	$BOOTSTACK, %esp
+	movl	$BOOTSTACKOFF, %esp
 	pushl	%edx
 
 	// fill 0 .bss
@@ -48,5 +49,5 @@ _start:
 	cld
 	rep;	stosb
 
-	call	pmm_init
+	call	pmode_init
 	call	boot

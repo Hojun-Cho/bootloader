@@ -1,27 +1,54 @@
-OUTPUT_FORMAT("elf32-i386", "elf32-i386", "elf32-i386")
-OUTPUT_ARCH(i386)
-
-PHDRS
+ PHDRS
 {
 	text PT_LOAD;
 }
 SECTIONS
 {
-	.text : {
-		KEEP(srt0.o(.text))
-		*(.text)
-	} :text
-	etext = .;
-	.data : { *(.data) } :text
-	.rodata : { *(.rodata) } :text
-	edata = .;
-	.bss : { *(.bss) } :text
-	ebss = .;
-    end = .;
-	/DISCARD/ : 
+  .text :
+  {
+    start = . ;
+    _start = . ;
+    __start = . ;
+    *(.text)
+    etext = . ;
+  } :text
+  .data :
+  {
+    __data_start__ = . ;
+    *(.data)
+    __data_end__ = . ;
+    __rdata_start__ = . ;
+    *(.rdata)
+    __rdata_end__ = . ;
+    *(.pdata)
+    *(.edata)
+  } :text
+  .bss :
+  {
+    edata = . ;
+    _edata = . ;
+    __edata = . ;
+    __bss_start__ = . ;
+    *(.bss)
+    __common_start__ = . ;
+    *(COMMON)
+    __bss_end__ = . ;
+    end = . ;
+    _end = . ;
+    __end = . ;
+  } :text
+  .stab :
+  {
+    *(.stab)
+  }
+  .stabstr :
+  {
+    *(.stabstr)
+  } :text
+  /DISCARD/ : 
     {
         *(.note.gnu.property)
         *(.comment)
     }
 }
- 
+
