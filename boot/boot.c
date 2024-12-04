@@ -33,26 +33,55 @@ machdep(void)
 static void
 puts(char *s)
 {
-	for(;*s;++s)	
+	for(;*s; ++s)
 		putchar(*s);
+}
+
+static void
+putcn(char *s, int n)
+{
+	for(int i=0; i < n; ++i)
+		putchar(s[i]);
+}
+
+static int
+rdline(char *buf, int n)
+{
+	char *p = buf;
+	char *e = buf + n;
+
+	while(p < e){
+		int c = getchar();
+		switch(c){
+		case '\177':
+		case '\b':
+			if(p > buf){
+				putchar('\177');
+				*--p = 0;
+			}
+			break;
+		case '\n':
+		case '\r':
+			goto done;
+		default:
+			*p++ = c;
+			break;
+		}
+	}
+	putchar('\n');
+done:
+	return p - buf;
 }
 
 void
 boot(int bootdev)
 {
-	char buf[8192];
-
 	machdep();	
-	putchar('\n');
 	for(;;){
-		int i=0, c=0;
+		char buf[8192];
 
 		puts("\nboot >> ");
-		do{
-			c = getchar();
-			buf[i++] = c;
-		}while(c != '\n' && i < sizeof(buf) - 1);
-		buf[i-1] = 0;
-		puts(buf);
+		int l = rdline(buf, sizeof(buf));
+		putcn(buf, l);
 	}
 }

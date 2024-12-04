@@ -3,7 +3,6 @@
 #include "fn.h"
 
 #define TABWIDTH 8
-#define DEL '\177'
 
 static void conputc(int c);
 static int congetc(void);
@@ -16,9 +15,9 @@ getchar(void)
 	int c;
 
 	c = congetc();	
-	if( c == '\r')
+	if(c == '\r')
 		c = '\n';
-	if((c < ' ' && c != '\n') || c == DEL)
+	if((c < ' ' && c != '\n') || c == '\177')
 		return c;
 	putchar(c);
 	return c;
@@ -28,12 +27,12 @@ void
 putchar(int c)
 {
 	switch(c){
-	case DEL:
+	case '\177':
 		conputc('\b');
 		conputc(' ');
 	case '\b':
 		conputc('\b');
-		if(pos)
+		if(pos > 0)
 			--pos;
 		break;
 	case '\t':
