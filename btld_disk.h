@@ -1,21 +1,3 @@
-#include <fcntl.h>
-#include <unistd.h>
-#include <stdint.h>
-#include <string.h>
-#include <sys/ioctl.h>
-#include <sys/stat.h>
-#include <limits.h>
-#include <assert.h>
-#include "def.h"
-
-#define elem(x) ((int)(sizeof(x)/sizeof((x)[0])))
-
-typedef uint8_t u8;
-typedef uint16_t u16;
-typedef uint32_t u32;
-typedef uint64_t u64;
-typedef unsigned int uint;
-
 typedef struct{
 	u64 cyl;
 	u64 head;

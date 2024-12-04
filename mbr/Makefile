@@ -1,19 +1,24 @@
-PROG=mbr
-SRCS=$(wildcard *.S)
-OBJS=$(SRCS:.S=.o)
+SDIR ?= ../
+BDIR ?= ./
 
-LDFLAGS = -Ttext 0 -e 0
-CPPFLAGS = -I $(IDIR)
+PROG = mbr
+SRCS = mbr.S
+OBJS = mbr.o
+
+include $(SDIR)/Makefile.inc
+
+CFLAGS += -c -fno-pie
+LDFLAGS += -Ttext 0 -e 0
+CPPFLAGS += -DBOOTSEG=$(BOOTSEG) -DBOOTRELOCSEG=$(BOOTRELOCSEG) -DMBRSTACKOFF=$(MBRSTACKOFF)
+CPPFLAGS += -I $(SDIR)/
 
 ${PROG}: $(OBJS)
-	@rm -f $(PROG)
 	$(LD) $(LDFLAGS) -o $(PROG) $(OBJS)
-	objcopy -O binary mbr mbr.new
-	dd if=mbr.new of=mbr bs=512 count=1
-	rm -rf mbr.new
-	mv $(PROG) $(BDIR)
+	objcopy -S -O binary mbr mbr.new
+	dd if=mbr.new of=$(BDIR)/mbr bs=512 count=1
+	rm -f mbr.new
 
-$(OBJS): ../def.h
+$(OBJS): $(SDIR)/Makefile.inc $(SDIR)/btld_conf.h
 
 clean:
-	rm -f *.o *.bin $(PROG)
+	rm -f $(OBJS) $(PROG)

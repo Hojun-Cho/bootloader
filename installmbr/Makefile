@@ -1,15 +1,17 @@
-PROG=installmbr
-SRCS=$(wildcard *.c)
-OBJS=$(SRCS:.c=.o)
+SDIR ?= ../
+BDIR ?= ./
 
-CFLAGS = -g
-CPPFLAGS = -I $(IDIR)
+PROG = installmbr
+SRCS = installmbr.c
+OBJS = installmbr.o
+
+CFLAGS = -g -Wall -Werror
+CPPFLAGS = -I $(SDIR)
 
 ${PROG}: $(OBJS)
-	@rm -f $(PROG)
-	$(CC) $(CFLAGS) -o $(BDIR)/$(PROG) $^ 
+	$(CC) $(CFLAGS) -o $(BDIR)/$(PROG) $(OBJS)
 
-$(OBJS): ../dat.h
+$(OBJS): $(SDIR)/u.h $(SDIR)/btld_conf.h $(SDIR)/btld_disk.h
 
 clean:
-	rm -rf $(PROG) $(OBJS)
+	rm -f $(PROG) $(OBJS)

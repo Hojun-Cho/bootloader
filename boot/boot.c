@@ -1,50 +1,58 @@
+#include <u.h>
+#include "dat.h"
+#include "fn.h"
 
-typedef unsigned short u16;
-typedef unsigned char u8;
-typedef int dev_t;
 
-#include "pio.h"
-#include "conf.h"
+void (*probe1[])(void) = {
+	a20up,
+};
+void (*probe2[])(void) = {
+};
 
-#define VGA_WIDTH 80
-#define VGA_LENGTH 25
+BootProbe probes[] = {
+	{"probing", probe1, elem(probe1) },
+	{"disk", probe2, elem(probe2) },
+};
 
-char*
-memcpy(char *a, char *b, int l)
+ConDev condev = {
+	.getc = pcgetc,
+	.putc = pcputc,
+};
+
+// https://wiki.osdev.org/BIOS
+void
+machdep(void)
 {
-	for(int i = 0; i < l; ++i)
-		a[i] = b[i];
-	return a;
+	for(int i = 0; i < elem(probes); ++i){
+		BootProbe bp = probes[i];
+		for(int j = 0; j < bp.cnt; ++j)
+			bp.probes[j]();
+	}	
 }
 
-int
-strlen(char *s)
+static void
+puts(char *s)
 {
-	int i = 0;
-	for(; s[i]; ++i)
-		;
-	return i;
-}
-
-char*
-itostr(int n, char *s)
-{
-	char buf[16];	
-	char *p = buf;
-
-	do {
-		*p++ = n%16;
-	}while((n/=16) != 0);
-
-	while(p > buf){
-		*s++ = "0123456789abcdef"[(int)*--p];
-	}
-	return s;
+	for(;*s;++s)	
+		putchar(*s);
 }
 
 void
-boot(dev_t bootdev)
+boot(int bootdev)
 {
-	machdep();
-	for(;;);
+	char buf[8192];
+
+	machdep();	
+	putchar('\n');
+	for(;;){
+		int i=0, c=0;
+
+		puts("\nboot >> ");
+		do{
+			c = getchar();
+			buf[i++] = c;
+		}while(c != '\n' && i < sizeof(buf) - 1);
+		buf[i-1] = 0;
+		puts(buf);
+	}
 }

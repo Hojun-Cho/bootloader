@@ -1,13 +1,14 @@
 .file "biosboot.S"
 
-#include "def.h"
-
 // 0x00000 -> 0x07BFF	our stack		(to  31k)
 // 0x07A00 -> 0x07BFF	typical MBR loc		(at  30k5)
 // 0x07C00 -> 0x07DFF	our code biosboot	(at  31k)
-// 0x07E00 -> ...    	/boot inode block	(at  31k5)
-// 0x07E00 -> ...    	(indirect block if nec)
-// 0x40000 -> ...	/boot			(at 256k)
+// 0x07E00 -> ...    	FAT table		(at  31k5)
+// 0x40000 -> ...	"boot" file		(at 256k)
+
+#define ELFMAGIC 0x464c457f  /* ELFMAGIC ("\7fELF") */
+#define FATSEG 0x07e0	/* FAT table segment */
+#define BOOTSTACKOFF ((BOOTSEG << 4) - 4)  /* stack starts here, grows down */
 
 #define PBR_READ_ERROR			'R'
 #define PBR_CANT_BOOT			'X'
@@ -71,7 +72,7 @@ main:
 load_boot:
 	start_cluster = .+1
 	movw	$0x9090, %ax
-	movw	$LOADSEG, %bx	 // destination
+	movw	$(LOADADDR >> 4), %bx	 // destination
 	movw	%bx, %di
 	movw	$FATSEG, %cx
 	movw	%cx, %es
@@ -158,7 +159,7 @@ Lchr:
 	ret
 
 done_load:
-	movw	$LOADSEG, %ax
+	movw	$(LOADADDR >> 4), %ax
 	movw	%ax, %es
 	cmpl	$ELFMAGIC, %es:0(,1)
 	je	exec_boot
@@ -202,4 +203,4 @@ err_id: .ascii	"?"
 crlf: .asciz	"\r\n"
 
 . = 0x200 - 2
-	.word DOSMBR_SIGNATURE
+	.word 0xaa55 

@@ -1,3 +1,15 @@
+
+// console.c
+int pcgetc(int dev);
+void pcputc(int dev, int c);
+
+// print.c
+void putchar(int c);
+int getchar(void);
+
+// a20.c
+void a20up(void);
+
 static __inline void
 outb(int port, u8 data)
 {
@@ -11,4 +23,4 @@ inb(int port)
 
 	__asm volatile("inb %w1,%0" : "=a" (data) : "d" (port));
 	return data;
-};
+}
