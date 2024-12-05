@@ -11,6 +11,9 @@ void print(const char *fmt, ...);
 // a20.c
 void a20up(void);
 
+// long.c
+long getsecs(void);
+
 static __inline void
 outb(int port, u8 data)
 {
