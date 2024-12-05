@@ -6,6 +6,7 @@ void pcputc(int dev, int c);
 // print.c
 void putchar(int c);
 int getchar(void);
+void print(const char *fmt, ...);
 
 // a20.c
 void a20up(void);
