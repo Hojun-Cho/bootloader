@@ -2,7 +2,6 @@
 #include "dat.h"
 #include "fn.h"
 
-
 void (*probe1[])(void) = {
 	a20up,
 };
@@ -31,24 +30,10 @@ machdep(void)
 }
 
 static void
-puts(char *s)
-{
-	for(;*s; ++s)
-		putchar(*s);
-}
-
-static void
-putcn(char *s, int n)
-{
-	for(int i=0; i < n; ++i)
-		putchar(s[i]);
-}
-
-static int
 rdline(char *buf, int n)
 {
 	char *p = buf;
-	char *e = buf + n;
+	char *e = buf + n - 1;
 
 	while(p < e){
 		int c = getchar();
@@ -70,18 +55,20 @@ rdline(char *buf, int n)
 	}
 	putchar('\n');
 done:
-	return p - buf;
+	*p = 0;
 }
 
 void
 boot(int bootdev)
 {
 	machdep();	
+	print("\n\n===> Hello world <===\n\tBooted on disk 0x%x\n", bootdev);
+
 	for(;;){
 		char buf[8192];
 
-		puts("\nboot >> ");
-		int l = rdline(buf, sizeof(buf));
-		putcn(buf, l);
+		print("\nboot >> ");
+		rdline(buf, sizeof buf);
+		print("%s", buf);
 	}
 }
