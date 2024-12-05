@@ -1,3 +1,6 @@
+#define elem(x) ((int)(sizeof(x)/sizeof((x)[0])))
+#define nil		((void*)0)
+
 #define FAT16_MAX (0x40000)
 #define	DOSPTYP_UNUSED 0x00
 #define	DOSPTYP_FAT16 0x06
@@ -10,3 +13,8 @@
 #define DOSMBR_SIGNATURE_OFF 0x1fe
 
 #define PARTSZ	16
+
+#define u8 unsigned char
+#define u16 unsigned short
+#define u32 unsigned int
+#define u64 unsigned long long

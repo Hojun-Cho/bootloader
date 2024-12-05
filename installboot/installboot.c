@@ -10,7 +10,6 @@
 #include <sys/wait.h>
 #include <errno.h>
 #include <assert.h>
-#include <u.h>
 #include "btld_conf.h"
 #include "btld_disk.h"
 #include "elf32.h"
