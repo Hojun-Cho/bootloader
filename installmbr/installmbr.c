@@ -10,7 +10,6 @@
 #include <endian.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <u.h>
 #include "btld_conf.h"
 #include "btld_disk.h"
 

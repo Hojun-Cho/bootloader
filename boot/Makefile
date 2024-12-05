@@ -10,7 +10,7 @@ OBJS += $(ESRCS:.c=.o)
 
 include $(SDIR)/Makefile.inc
 
-CFLAGS += -no-pie 
+CFLAGS += -no-pie  -g
 CPPFLAGS += -DLOADADDR=$(LOADADDR) -DLINKADDR=$(LINKADDR) -DBOOTMAGIC=$(BOOTMAGIC) -DBOOTSTACKOFF=$(BOOTSTACKOFF)
 CPPFLAGS += -I $(SDIR)
 LDFLAGS += -s -Ttext=$(LINKADDR) -T ld.script --no-omagic -M
