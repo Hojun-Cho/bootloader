@@ -15,7 +15,7 @@ print(const char *fmt, ...)
 {
 	va_list args;
 
-	va_start(args, fmt);	
+	va_start(args, fmt);
 	doprint(putchar, fmt, args);
 	va_end(args);
 }
@@ -31,7 +31,7 @@ doprint(void (*put)(int), const char *s, va_list ap)
 		++s;
 		switch(*s){
 		case 'd':
-			putint(put, va_arg(ap,int), "0123456789", 10);		
+			putint(put, va_arg(ap,int), "0123456789", 10);
 			break;
 		case 'x':
 			putint(put, va_arg(ap,int), "0123456789abcdef", 16);
@@ -45,7 +45,7 @@ doprint(void (*put)(int), const char *s, va_list ap)
 			break;
 		default:
 			return;
-		}	
+		}
 		++s;
 	}
 }
@@ -98,16 +98,16 @@ static void
 conputc(int c)
 {
 	if(c){
-		condev.putc(condev.dev, c);
+		con->putc(con->dev, c);
 		if(c == '\n')
-			condev.putc(condev.dev, '\r');
+			con->putc(con->dev, '\r');
 	}	
 }
 
 static int 
 congetc(void)
 {
-	return condev.getc(condev.dev);
+	return con->getc(con->dev);
 }
 
 static void

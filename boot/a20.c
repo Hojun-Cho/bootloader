@@ -1,4 +1,5 @@
 #include <u.h>
+#include "dat.h"
 #include "fn.h"
 
 #define I8042_DPORT 0x60

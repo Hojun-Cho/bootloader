@@ -2,8 +2,11 @@
 #include "dat.h"
 #include "fn.h"
 
+static void coninit(void);
+static void machdep(void);
+
 void (*probe1[])(void) = {
-	a20up,
+	a20up, coninit,
 };
 void (*probe2[])(void) = {
 };
@@ -13,13 +16,41 @@ BootProbe probes[] = {
 	{"disk", probe2, elem(probe2) },
 };
 
-ConDev condev = {
-	.getc = pcgetc,
-	.putc = pcputc,
+ConDev contab[CON_END] = {
+	{
+		.probe = pcprobe,
+		.init = pcinit,
+		.getc = pcgetc,
+		.putc = pcputc
+	},
+	{
+		// serial console
+		.probe = comprobe,
+		.getc = comgetc,
+		.putc = computc,
+		.init = cominit,
+	},
 };
+ConDev *con = &contab[0];
+
+static void
+coninit(void)
+{
+	ConDev *p = con;
+
+	for(int i = 0; i < elem(contab); ++i){
+		ConDev *t = &contab[i];
+		if(t->probe(t) != 0 && t->pri > p->pri)
+			p = t;
+	}
+	if(p){
+		p->init(p);
+		con = p;
+	}
+}
 
 // https://wiki.osdev.org/BIOS
-void
+static void
 machdep(void)
 {
 	for(int i = 0; i < elem(probes); ++i){
@@ -61,8 +92,8 @@ done:
 void
 boot(int bootdev)
 {
-	machdep();	
 	print("\n\n===> Hello world <===\n\tBooted on disk 0x%x\n", bootdev);
+	machdep();	
 
 	for(;;){
 		char buf[8192];
