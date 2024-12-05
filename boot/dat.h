@@ -3,6 +3,12 @@
 // 0x64	Read	Status Register
 // 0x64	Write	Command Register
 
+enum{
+	CON_PC,
+	CON_SRI,
+	CON_END,
+};
+
 struct BIOSreg{
 	u32 ax; 
 	u32 cx; 
@@ -15,18 +21,21 @@ struct BIOSreg{
 	u32 es; 
 }__attribute__((packed));
 
-
 typedef struct{
 	char *name;
 	void (**probes)(void);
-	int cnt;
+	uint cnt;
 }BootProbe;
 
-typedef struct{
+typedef struct ConDev ConDev;
+struct ConDev{
+	int (*probe)(ConDev*);
+	void (*init)(ConDev *);
 	int (*getc)(int);
 	void (*putc)(int, int);
-	int	dev;
-}ConDev;
+	uint dev;
+	uchar pri; // the higher the better
+};
 
 // gdt.S
 extern volatile struct BIOSreg BIOSreg;
@@ -35,4 +44,5 @@ extern volatile struct BIOSreg BIOSreg;
 extern void (*probe1[])(void);
 extern void (*probe2[])(void);
 extern BootProbe probes[];
-extern ConDev condev;
+extern ConDev contab[CON_END];
+extern ConDev *con;

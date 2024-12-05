@@ -3,8 +3,10 @@
 #include "fn.h"
 
 // https://stanislavs.org/helppc/int_1a.html
-#define INT_TIME 2<<8
-#define INT_DATE 4<<8
+enum{
+	GET_TIME = 2<<8,
+ 	GET_DATE = 4<<8,
+};
 
 static int
 bcd2int(u8 c)
@@ -59,8 +61,8 @@ getsecs(void)
 	u8 t[4], d[4];
 	long s;
 
-	int1a(INT_TIME, t);
-	int1a(INT_DATE, d);
+	int1a(GET_TIME, t);
+	int1a(GET_DATE, d);
 	s = (date2day(d[0]*100+d[1], d[2], d[3]) * 24 + t[0]) * 60
 		+ (t[1] * 60) + t[2];
 	return s;	

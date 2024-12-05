@@ -1,7 +1,23 @@
+// PC console
 #include <u.h>
+#include "dat.h"
 #include "fn.h"
 
 // https://stanislavs.org/helppc/int_16.html
+int
+pcprobe(ConDev *d)
+{
+	d->pri = 2;
+	d->dev = makedev(12, 0);
+	print("PC:%d\n", minor(d->dev));
+	return 1;
+}
+
+void
+pcinit(ConDev *d)
+{
+	USED(d);	
+}
 
 void
 pcputc(int dev, int c)
