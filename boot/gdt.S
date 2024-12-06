@@ -2,6 +2,16 @@
 
 #include "def.h"
 
+#define	AX 0
+#define	CX 4
+#define	DX 8
+#define	BX 12
+#define	BP 16
+#define	SI 20
+#define	DI 24
+#define	DS 28
+#define	ES 32
+
 #define GEN_LABEL(n)	X##n
 
 // idt entry
@@ -64,21 +74,11 @@
 	lidt	Idtr;
 
 .text
-.globl	BIOSreg	
-BIOSreg:
-	BIOS_AX: .long 0 
-	BIOS_CX: .long 0 
-	BIOS_DX: .long 0 
-	BIOS_BX: .long 0 
-	BIOS_BP: .long 0 
-	BIOS_SI: .long 0 
-	BIOS_DI: .long 0 
-	BIOS_DS: .long 0 
-	BIOS_ES: .long 0 
-
-.text
 .code32
 .globl	pmode_init	
+.globl	BIOSreg
+BIOSreg:
+	.space 64
 
 //	Table
 //	IDTR offset + 0 : entry 0
@@ -246,11 +246,9 @@ EMUh: // build stack for real mode
 	movb	%al, intno	// save BIOS int vector
 
 // BIOS_regs is  area for saving the contents of registers returned by the BIOS during a BIOS CALL
-	movl	BIOS_ES, %eax
-	movl	$0x00, %eax
+	movl	BIOSreg+ES, %eax
 	mov	%eax, 7f
-	movl	BIOS_DS, %eax
-	movl	$0x00, %eax
+	movl	BIOSreg+DS, %eax
 	mov	%eax, 6f	
 
 	prot2real
@@ -300,12 +298,13 @@ intno = . -1;
 	// movl $Leax, %eax
 	.byte	0xb8
 4:	.long	0x90909090
-	mov	%eax, BIOS_BX
+	movl	%eax, BIOSreg+BX
 
 	// movl $Leax, %eax
 	.byte	0xb8
 3:	.long	0x90909090
-	mov	%eax, BIOS_ES
+	movl	%eax, BIOSreg+ES
+
 
 	// movl $Leax, %eax
 	.byte	0xb8
@@ -318,13 +317,13 @@ intno = . -1;
 	movb	%bh, 0xe*4(%esp)	// restore eflags
 
 	// save register into BIOSREG
-	.code32
-	movl	%eax, BIOS_AX
-	movl	%ecx, BIOS_CX
-	movl	%edx, BIOS_DX
-	movl	%ebp, BIOS_BP
-	movl	%esi, BIOS_SI
-	movl	%edi, BIOS_DI
+	movl	%eax, BIOSreg+AX
+	movl	%ecx, BIOSreg+CX
+	movl	%edx, BIOSreg+DX
+	movl	%ebp, BIOSreg+BP
+	movl	%esi, BIOSreg+SI
+	movl	%edi, BIOSreg+DI
+
 
 	// clear NT(Nested Task Flag: 14) flag in eflag
 	// if 1 : interrupting
