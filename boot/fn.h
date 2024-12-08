@@ -1,3 +1,6 @@
+#define MAX(x, y) ((x)>(y)?(x):(y))
+#define MIN(x, y) ((x)<(y)?(x):(y))
+
 // console.c
 void cominit(ConDev *d);
 void pcinit(ConDev *d);
@@ -16,7 +19,10 @@ void print(const char *fmt, ...);
 // a20.c
 void a20up(void);
 
-// long.c
+// mem.c
+void memprobe(void);
+
+// time.c
 long getsecs(void);
 
 static __inline int

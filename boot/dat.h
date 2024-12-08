@@ -36,6 +36,11 @@ struct ConDev{
 	uint dev;
 	uchar pri; // the higher the better
 };
+typedef struct{
+	u64 addr;		/* Beginning of block */
+	u64 size;		/* Size of block */
+	u32 type;		/* Type of block */
+} __attribute__((packed)) BIOSmmap;
 
 // gdt.S
 extern volatile struct BIOSreg BIOSreg;
@@ -44,5 +49,7 @@ extern volatile struct BIOSreg BIOSreg;
 extern void (*probe1[])(void);
 extern void (*probe2[])(void);
 extern BootProbe probes[];
+extern BIOSmmap biosmmap[64];
 extern ConDev contab[CON_END];
 extern ConDev *con;
+extern uint cnvmem, extmem;

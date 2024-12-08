@@ -78,7 +78,7 @@
 .globl	pmode_init	
 .globl	BIOSreg
 BIOSreg:
-	.space 64
+	.space 36, 0
 
 //	Table
 //	IDTR offset + 0 : entry 0
