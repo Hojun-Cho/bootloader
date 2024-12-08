@@ -6,7 +6,7 @@ static void coninit(void);
 static void machdep(void);
 
 void (*probe1[])(void) = {
-	a20up, coninit,
+	a20up, coninit, memprobe,
 };
 void (*probe2[])(void) = {
 };
@@ -31,7 +31,10 @@ ConDev contab[CON_END] = {
 		.init = cominit,
 	},
 };
+
 ConDev *con = &contab[0];
+BIOSmmap biosmmap[64];
+uint cnvmem, extmem;
 
 static void
 coninit(void)
