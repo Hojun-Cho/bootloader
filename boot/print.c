@@ -2,61 +2,42 @@
 #include "dat.h"
 #include "fn.h"
 
-#define TABWIDTH 4
+#define BUFSIZE 1024
 
-static void conputc(int c);
+static void conputc(int);
 static int congetc(void);
-static void doprint(void (*put)(int), const char *fmt, va_list ap);
-static void putint(void (*put)(int), int n, const char *sym, int base);
-static int pos = 0;
 
-void
-print(const char *fmt, ...)
+int
+print(char *fmt, ...)
 {
+	char buf[BUFSIZE], *p;
 	va_list args;
 
 	va_start(args, fmt);
-	doprint(putchar, fmt, args);
+	p = doprint(buf, buf+sizeof(buf), fmt, args);
 	va_end(args);
+	putstr(buf, p-buf);
+	return p-buf;
 }
 
-static void
-doprint(void (*put)(int), const char *s, va_list ap)
+int
+snprint(char *buf, int len, char *fmt, ...)
 {
-	while(*s){
-		if(*s != '%'){
-			put(*s++);
-			continue;
-		}
-		++s;
-		switch(*s){
-		case 'd':
-			putint(put, va_arg(ap,int), "0123456789", 10);
-			break;
-		case 'x':
-			putint(put, va_arg(ap,int), "0123456789abcdef", 16);
-			break;
-		case 'X':
-			putint(put, va_arg(ap,int), "0123456789ABCDEF", 16);
-			break;
-		case 's':
-			for(char *p=va_arg(ap,char*); *p; ++p)
-				put(*p);
-			break;
-		default:
-			return;
-		}
-		++s;
-	}
-}
+	char *p;
+	va_list args;
 
+	va_start(args, fmt);
+	p = doprint(buf, buf+len, fmt, args);
+	va_end(args);
+	return p-buf;
+}
 
 int
 getchar(void)
 {
 	int c;
 
-	c = congetc();	
+	c = congetc();
 	if(c == '\r')
 		c = '\n';
 	if((c < ' ' && c != '\n') || c == '\177')
@@ -66,30 +47,33 @@ getchar(void)
 }
 
 void
+putstr(char *s, int l)
+{
+	while(l--)
+		putchar(*s++);
+}
+
+void
 putchar(int c)
 {
 	switch(c){
 	case '\177':
 		conputc('\b');
 		conputc(' ');
+		break;
 	case '\b':
 		conputc('\b');
-		if(pos > 0)
-			--pos;
 		break;
 	case '\t':
-		do{
+		for(int i = 0; i < TABWIDTH; ++i)
 			conputc(' ');
-		}while(++pos % TABWIDTH);
 		break;
 	case '\n':
 	case '\r':
 		conputc(c);
-		pos = 0;
 		break;
 	default:
 		conputc(c);
-		++pos;
 		break;
 	}	
 }
@@ -108,20 +92,4 @@ static int
 congetc(void)
 {
 	return con->getc(con->dev);
-}
-
-static void
-putint(void (*put)(int), int n, const char *sym, int base)
-{
-	int i;
-	char buf[16];
-
-	i = 0;
-	do{
-		buf[i++] = n%base;
-		n /= base;
-	}while(n);
-	do{
-		put((int)sym[(int)buf[--i]]);
-	}while(i);
 }

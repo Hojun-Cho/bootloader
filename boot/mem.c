@@ -42,13 +42,13 @@ dumpmem(BIOSmmap *m)
 	ulong tot = 0;
 
 	for(BIOSmmap *p=m; p->type != MAP_END; ++p){
-		print("MEM %u type %u size %lldKB at 0x%llx\n",
-			p-m, p->type, p->size/1024, p->addr);
+		print("MEM % 2ud type %ud size % 10udKB at %08x:%08x\n",
+			p-m, p->type, (uint)(p->size/1024), (uint)(p->addr>>32), (uint)p->addr);
 		if(p->type == MAP_FREE)
 			tot += p->size/1024;
 	}
-	print("RAM low:%dKB high:%dKB\n", cnvmem, extmem);	
-	print("Total free memory: %dKB\n", tot);
+	print("RAM low:%udKB high:%udKB\n", cnvmem, extmem);
+	print("Total free memory: %udKB\n", tot);
 }
 
 static int
@@ -70,13 +70,12 @@ memprobe(void)
 	m->type = MAP_END;
 	for(m = biosmmap; m->type != MAP_END; ++m){
 		if(m->type != MAP_FREE || m->size <= 0)
-			continue;	
+			continue;
 		if(m->addr < IOMEM_BEGIN)
 			cnvmem = MAX(cnvmem, m->addr + m->size)/1024;
 		if(m->addr >= IOMEM_END)
 			extmem += m->size/1024;
 	}
 	dumpmem(biosmmap);
-	print("A20:%d", isa20done());
+	print("A20:%s\n", isa20done() ? "ok" : "no");
 }
-

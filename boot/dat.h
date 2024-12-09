@@ -2,6 +2,7 @@
 // 0x60	Read/Write	Data Port
 // 0x64	Read	Status Register
 // 0x64	Write	Command Register
+#define TABWIDTH 8
 
 enum{
 	CON_PC,
@@ -41,6 +42,16 @@ typedef struct{
 	u64 size;		/* Size of block */
 	u32 type;		/* Type of block */
 } __attribute__((packed)) BIOSmmap;
+
+// fmt.c
+typedef struct{
+	int ucase;
+	int padch;
+	char *p;
+	char *ep;
+	int f1, f2, f3;
+	va_list ap;
+}Op;
 
 // gdt.S
 extern volatile struct BIOSreg BIOSreg;
