@@ -29,6 +29,9 @@ void a20up(void);
 // mem.c
 void memprobe(void);
 
+// cpu.c
+void cpuidprobe(void);
+
 // time.c
 long getsecs(void);
 

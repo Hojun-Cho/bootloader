@@ -7,6 +7,7 @@ static void machdep(void);
 
 void (*probe1[])(void) = {
 	a20up, coninit, memprobe,
+	cpuidprobe,
 };
 void (*probe2[])(void) = {
 };

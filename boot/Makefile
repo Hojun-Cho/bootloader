@@ -5,7 +5,7 @@ PROG = boot
 SRCS = srt0.S gdt.S boot.c
 OBJS = srt0.o gdt.o boot.o
 
-ESRCS = pccon.c sricon.c print.c fmt.c a20.c time.c mem.c
+ESRCS = pccon.c sricon.c print.c fmt.c a20.c time.c mem.c cpu.c
 OBJS += $(ESRCS:.c=.o)
 
 include $(SDIR)/Makefile.inc
