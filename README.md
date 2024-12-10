@@ -1,6 +1,10 @@
 # FAT16 bootloader
 	x86 FAT16 bootloader
-	
+
+ # Feature
+* [serial console](https://github.com/Hojun-Cho/bootloader/blob/master/boot/sricon.c)
+* [prompt](https://github.com/Hojun-Cho/bootloader/blob/98601ac381e30d98b4f3f2c20a733beebf9c2ee3/boot/boot.c#L105)
+
 ### How to run
 	1. install image to device
 		install to device
