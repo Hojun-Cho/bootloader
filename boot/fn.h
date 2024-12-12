@@ -12,7 +12,8 @@ int comgetc(int dev);
 void computc(int dev, int c);
 
 // fmt.c
-int fmtinstall(int c, Op (*f)(Op));
+char* dofmt(Op *op, char *fmt);
+int fmtinstall(int c, int (*f)(Op*));
 char *doprint(char *p, char *ep, char *fmt, va_list ap);
 int strlen(char *s);
 
@@ -20,6 +21,7 @@ int strlen(char *s);
 void putchar(int c);
 void putstr(char *s, int l);
 int getchar(void);
+char* doprint(char *p, char *ep, char *fmt, va_list);
 int print(char *fmt, ...);
 int snprint(char *buf, int len, char *fmt, ...);
 

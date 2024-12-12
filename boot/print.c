@@ -7,6 +7,13 @@
 static void conputc(int);
 static int congetc(void);
 
+char*
+doprint(char *p, char *ep, char *fmt, va_list ap)
+{
+	Op op = { .p = p, .ep = ep, .ap = ap };
+	return dofmt(&op, fmt);
+}
+
 int
 print(char *fmt, ...)
 {

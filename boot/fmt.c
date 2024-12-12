@@ -11,19 +11,19 @@ enum{
 	FUNSIGN = (1<<3),
 };
 
-static Op put(Op, int);
-static Op noconv(Op);
-static Op cconv(Op);
-static Op dconv(Op);
-static Op hconv(Op);
-static Op lconv(Op);
-static Op sconv(Op);
-static Op uconv(Op);
-static Op xconv(Op);
-static Op Xconv(Op);
-static Op percent(Op);
+static void put(Op*, int);
+static int noconv(Op*);
+static int cconv(Op*);
+static int dconv(Op*);
+static int hconv(Op*);
+static int lconv(Op*);
+static int sconv(Op*);
+static int uconv(Op*);
+static int xconv(Op*);
+static int Xconv(Op*);
+static int percent(Op*);
 
-static Op (*fmtconv[MAXCON])(Op) = {
+static int (*fmtconv[MAXCON])(Op*) = {
 	noconv,
 	cconv, dconv, hconv, lconv,
 	sconv, uconv, xconv, Xconv,
@@ -54,7 +54,7 @@ strlen(char *s)
 }
 
 int
-fmtinstall(int c, Op (*f)(Op))
+fmtinstall(int c, int (*f)(Op*))
 {
 	c &= 0177;
 	if(fmtindex[c] == 0){
@@ -67,88 +67,87 @@ fmtinstall(int c, Op (*f)(Op))
 }
 
 char*
-doprint(char *p, char *ep, char *fmt, va_list ap)
+dofmt(Op *op, char *fmt)
 {
 	int sf1, c;
-	Op o = { .p = p, .ep = ep, .ap = ap };
 
 	while(1){
 		c = *fmt++;
 		if(c != '%'){
 			if(c == 0){
-				if(o.p < o.ep)
-					*o.p = 0;
-				return o.p;
+				if(op->p < op->ep)
+					*op->p = 0;
+				return op->p;
 			}
-			o = put(o, c);
+			put(op, c);
 			continue;
 		}
-		o.f2 = -1;
-		o.f1 = o.f3 = 0;
-		o.padch = sf1 = 0;
+		op->f2 = -1;
+		op->f1 = op->f3 = 0;
+		op->padch = sf1 = 0;
 		c = *fmt++;
 		if(c == '-'){
 			sf1 = 1;
 			c = *fmt++;
 		}else if(c == '0' || c == ' '){
-			o.padch = c;
+			op->padch = c;
 			c = *fmt++;
 		}
 		while(c >= '0' && c <= '9'){
-			o.f1 = o.f1*10 + c-'0';
+			op->f1 = op->f1*10 + c-'0';
 			c = *fmt++;
 		}
 		if(sf1)
-			o.f1 = -o.f1;
+			op->f1 = -op->f1;
 		if(c != '.')
 			goto conv;
 		c = *fmt++;
 		while(c >= '0' && c <= '9'){
-			if(o.f2 < 0)
-				o.f2 = 0;
-			o.f2 = o.f2*10 + c-'0';
+			if(op->f2 < 0)
+				op->f2 = 0;
+			op->f2 = op->f2*10 + c-'0';
 			c = *fmt++;
 		}
 conv:
 		if(c == 0)
 			fmt -= 1;
-		o = (*fmtconv[fmtindex[c&0177]])(o);
-		if(o.f3){
+		c = (*fmtconv[fmtindex[c&0177]])(op);
+		if(c < 0){
+			op->f3 |= -c;
 			c = *fmt++;
 			goto conv;
 		}
 	}
 }
 
-static Op 
-strconv(char *o, Op op, int f1, int f2)
+static void 
+strconv(char *s, Op *op, int f1, int f2)
 {
 	int n, c;
 	char *p;
 
-	n = strlen(o);
+	n = strlen(s);
 	if(f1 >= 0)
 		while(n < f1){
-			op = put(op, op.padch);
+			put(op, op->padch);
 			n += 1;
 		}
-	for(p=o; (c = *p++);)
+	for(p=s; (c = *p++);)
 		if(f2){
-			op = put(op, c);
+			put(op, c);
 			f2 -= 1;
 		}
 	if(f1 < 0){
 		f1 = -f1;
 		while(n < f1){
-			op = put(op, ' ');
+			put(op, ' ');
 			n += 1;
 		}	
 	}
-	return op;
 }
 
-static Op 
-numconv(Op op, int base)
+static void 
+numconv(Op *op, int base)
 {
 	char b[IDIGIT];
 	int i,f,n;
@@ -158,28 +157,28 @@ numconv(Op op, int base)
 	i = IDIGIT-1;
 	f = 0;
 	b[i] = 0;
-	switch(op.f3 & (FLONG|FSHORT|FUNSIGN)){
+	switch(op->f3 & (FLONG|FSHORT|FUNSIGN)){
 	case FLONG:
-		v = va_arg(op.ap, long);
+		v = va_arg(op->ap, long);
 		break;
 	case FUNSIGN|FLONG:
-		v = va_arg(op.ap, ulong);
+		v = va_arg(op->ap, ulong);
 		break;
 	case FSHORT:
-		v = h = va_arg(op.ap, short);
+		v = h = va_arg(op->ap, short);
 		break;
 	case FUNSIGN|FSHORT:
-		h = va_arg(op.ap, ushort);
+		h = va_arg(op->ap, ushort);
 		v = (ushort)h;
 		break;
 	case FUNSIGN:
-		v = va_arg(op.ap, unsigned);
+		v = va_arg(op->ap, unsigned);
 		break;
 	default:
-		v = va_arg(op.ap, long);
+		v = va_arg(op->ap, int);
 		break;
 	}
-	if((op.f3 & FUNSIGN) && v < 0){
+	if((op->f3 & FUNSIGN) && v < 0){
 		v = -v;
 		f = 1;
 	}
@@ -188,117 +187,118 @@ numconv(Op op, int base)
 		n += '0';
 		if(n > '9'){
 			n += 'a' - ('9'+1);
-			if(op.ucase)
+			if(op->ucase)
 				n += 'A'-'a';
 		}
 		b[i] = n;
 		v = (ulong)v / base;
 		if(i < 2)
 			break;
-		if(op.f2 >= 0 && i >= IDIGIT - op.f2)
+		if(op->f2 >= 0 && i >= IDIGIT - op->f2)
 			continue;
 		if(v <= 0)
 			break;
 	}
 	if(f)
 		b[--i] = '-';
-	op.f3 = 0;
-	return strconv(b+i, op, op.f1, -1);
+	strconv(b+i, op, op->f1, -1);
 }
 
-static Op
-noconv(Op op)
+static int
+noconv(Op *op)
 {
-	return strconv("***ERROR: noconv***", op, 0, -1);
+	strconv("***ERROR: noconv***", op, 0, -1);
+	return 0;
 }
 
-static Op
-cconv(Op op)
+static int
+cconv(Op *op)
 {
 	char b[2];
 
-	b[0] = va_arg(op.ap, char);
+	b[0] = va_arg(op->ap, char);
 	b[1] = 0;
-	return strconv(b, op, op.f1, -1);
+	strconv(b, op, op->f1, -1);
+	return 0;
 }
 
-static Op
-dconv(Op op)
+static int
+dconv(Op *op)
 {
-	return numconv(op, 10);
+	numconv(op, 10);
+	return 0;
 }
 
-static Op
-hconv(Op op)
+static int
+hconv(Op *op)
 {
-	op.f3 |= FSHORT;
-	return op;
+	return -FSHORT;
 }
 
-static Op
-lconv(Op op)
+static int
+lconv(Op *op)
 {
-	op.f3 |= FLONG;
-	return op;
+	return -FLONG;
 }
 
-static Op
-uconv(Op op)
+static int
+uconv(Op *op)
 {
-	op.f3 |= FUNSIGN;
-	return op;
+	return -FUNSIGN;
 }
 
-static Op
-sconv(Op op)
+static int
+sconv(Op *op)
 {
 	char *p;
 
-	p = va_arg(op.ap, char*);
-	return strconv(p?p:"<nil>", op, op.f1, op.f2);
+	p = va_arg(op->ap, char*);
+	strconv(p?p:"<nil>", op, op->f1, op->f2);
+	return 0; 
 }
 
-static Op
-xconv(Op op)
+static int
+xconv(Op *op)
 {
-	return numconv(op, 16);
+	numconv(op, 16);
+	return 0;
 }
 
-static Op
-Xconv(Op op)
+static int
+Xconv(Op *op)
 {
-	op.ucase = 1;
-	op = numconv(op, 16);
-	op.ucase = 0;
-	return op;
+	op->ucase = 1;
+	numconv(op, 16);
+	op->ucase = 0;
+	return 0;
 }
 
-static Op
-percent(Op op)
+static int
+percent(Op *op)
 {
-	return put(op, '%');
+	put(op, '%');
+	return 0;
 }
 
-static Op
-put(Op o, int c)
+static void
+put(Op *op, int c)
 {
 	static int pos;
 	int opos;
 
 	if(c == 0)
-		return o;
+		return;
 	if(c == '\t'){
 		opos = pos;
 		pos = (opos+TABWIDTH) & (~(TABWIDTH-1));
-		while(opos++ < pos && o.p < o.ep)
-			*o.p++ = ' ';
-		return o;
+		while(opos++ < pos && op->p < op->ep)
+			*op->p++ = ' ';
+		return;
 	}	
-	if(o.p < o.ep){
-		*o.p++ = c;
+	if(op->p < op->ep){
+		*op->p++ = c;
 		pos++;
 	}
 	if(c == '\n')
 		pos = 0;
-	return o;
 }
