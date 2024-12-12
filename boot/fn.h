@@ -35,6 +35,13 @@ void cpuidprobe(void);
 // time.c
 long getsecs(void);
 
+// alloc.c
+void *alloc(uint);
+void free(void*);
+
+// util
+void* memset(void *dst, int v, int l);
+
 static __inline int
 major(int x)
 {

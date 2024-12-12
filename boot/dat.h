@@ -3,6 +3,9 @@
 // 0x64	Read	Status Register
 // 0x64	Write	Command Register
 #define TABWIDTH 8
+#ifndef BOOT_DEBUG
+#define BOOT_DEBUG 1
+#endif
 
 enum{
 	CON_PC,
@@ -64,3 +67,4 @@ extern BIOSmmap biosmmap[64];
 extern ConDev contab[CON_END];
 extern ConDev *con;
 extern uint cnvmem, extmem;
+extern int debug;

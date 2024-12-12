@@ -36,6 +36,7 @@ ConDev contab[CON_END] = {
 ConDev *con = &contab[0];
 BIOSmmap biosmmap[64];
 uint cnvmem, extmem;
+int debug = BOOT_DEBUG;
 
 static void
 coninit(void)
@@ -96,7 +97,8 @@ done:
 void
 boot(int bootdev)
 {
-	print("\n\n===> Hello world <===\n\tBooted on disk 0x%x\n", bootdev);
+	print("\n===> Hello world <===\n\t"
+		"Booted on disk 0x%x debug:%d\n\t", bootdev, debug);
 	machdep();	
 
 	for(;;){
