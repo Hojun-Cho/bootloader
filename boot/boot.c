@@ -97,9 +97,15 @@ done:
 void
 boot(int bootdev)
 {
+	BIOSdisk d = {0,};
+
+	fmtinstall('D', fmtdisk);
 	print("\n===> Hello world <===\n\t"
 		"Booted on disk 0x%x debug:%d\n\t", bootdev, debug);
 	machdep();	
+
+	bdiskget(bootdev, &d);
+	print("%D\n%D", d,d);
 
 	for(;;){
 		char buf[8192];

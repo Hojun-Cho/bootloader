@@ -56,6 +56,18 @@ typedef struct{
 	va_list ap;
 }Op;
 
+// disk.c
+typedef struct{
+	int n;
+	u32 ncyl;
+	u32 nhead;
+	u32 nsec;
+	i32 edd;
+	u32 dev ;
+	u32 checksum;
+	u32 flag;
+} __attribute__((packed)) BIOSdisk;
+
 // gdt.S
 extern volatile struct BIOSreg BIOSreg;
 

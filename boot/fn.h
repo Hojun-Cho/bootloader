@@ -41,6 +41,10 @@ long getsecs(void);
 void *alloc(uint);
 void free(void*);
 
+// disk.c
+int bdiskget(int dev, BIOSdisk *d);
+int fmtdisk(Op *op);
+
 // util
 void* memset(void *dst, int v, int l);
 
