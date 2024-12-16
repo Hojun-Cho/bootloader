@@ -7,6 +7,9 @@
 #define BOOT_DEBUG 1
 #endif
 
+#define DOSPARTOFF 446
+#define NDOSPART 4
+
 enum{
 	CON_PC,
 	CON_SRI,
@@ -58,6 +61,25 @@ typedef struct{
 
 // disk.c
 typedef struct{
+	u8 flag;	/* bootstrap flags */
+	u8 bhd;	/* begin head */
+	u8 bsec;	/* begin sector */
+	u8 bcyl;	/* begin cylinder */
+	u8 type;	/* partition type (see below) */
+	u8 ehd;	/* end head */
+	u8 esec;	/* end sec2r */
+	u8 ecyl;	/* end cylinder */
+	u32 beg;	/* absolute starting sectoff number */
+	u32 size;	/* partition size in sec2rs */
+} __attribute__((packed)) DOSpart;
+
+typedef struct{
+	u8 boot[DOSPARTOFF];
+	DOSpart parts[NDOSPART];
+	u16 sign;
+} __attribute__((packed)) DOSmbr;
+
+typedef struct{
 	int n;
 	u32 ncyl;
 	u32 nhead;
@@ -67,6 +89,17 @@ typedef struct{
 	u32 checksum;
 	u32 flag;
 } __attribute__((packed)) BIOSdisk;
+
+typedef struct{
+
+}Disklabel;
+
+typedef struct{
+	BIOSdisk bdsk;	// bios disk info
+	Disklabel label;
+
+	int bootdev, osdev;
+}Disk;
 
 // gdt.S
 extern volatile struct BIOSreg BIOSreg;
